@@ -15,7 +15,7 @@ user_options: {}
 meta_data:
   display_name: XAI lag forecast
   description: >
-    Lagged climate and population features with linear or XGBoost,
+    Lagged climate and population features with linear or sklearn boosting,
     log1p target, and native SHAP outputs.
   author: Edvin
   author_note: Native XAI testing

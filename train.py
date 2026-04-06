@@ -6,9 +6,9 @@ import joblib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from xgboost import XGBRegressor
 import shap
 
 
@@ -61,18 +61,16 @@ def train(csv_fn, model_fn):
     def build_model(n_rows):
         if n_rows < 30:
             return LinearRegression()
-        return XGBRegressor(
-            n_estimators=800,
+        return HistGradientBoostingRegressor(
+            max_iter=800,
             learning_rate=0.03,
             max_depth=5,
-            subsample=0.9,
-            colsample_bytree=0.9,
-            min_child_weight=2,
-            reg_alpha=0.0,
-            reg_lambda=1.0,
-            objective='reg:squarederror',
+            max_leaf_nodes=31,
+            min_samples_leaf=10,
+            l2_regularization=1.0,
+            max_features=0.9,
+            early_stopping=False,
             random_state=42,
-            n_jobs=1
         )
 
     eval_model = build_model(len(X_train))
