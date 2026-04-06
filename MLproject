@@ -1,4 +1,4 @@
-name: min_py_ex
+name: chap_xai_lag_forecast
 
 entry_points:
   train:

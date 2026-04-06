@@ -1,4 +1,14 @@
+joblib
+matplotlib
+numpy
+pandas
+scikit-learn
+shap
+xgboost
 pandas
 numpy
 chap-core
 scikit-learn
+xgboost
+shap
+matplotlib
