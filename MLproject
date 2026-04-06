@@ -1,15 +1,42 @@
 name: chap_xai_lag_forecast
 
+target: disease_cases
+required_covariates:
+  - rainfall
+  - mean_temperature
+  - population
+allow_free_additional_continuous_covariates: False
+supported_period_type: month
+user_options: {}
+
+meta_data:
+  display_name: XAI lag forecast
+  description: >
+    Lagged climate and population features with linear or XGBoost,
+    log1p target, and native SHAP outputs.
+  author: Edvin
+  author_note: Native XAI testing
+  contact_email: edvin@devotta.no
+
+adapters:
+  Cases: disease_cases
+  E: population
+  month: month
+  ID_year: year
+  ID_spat: location
+  rainsum: rainfall
+  meantemperature: mean_temperature
+
 entry_points:
   train:
     parameters:
-      train_data: str
+      train_data: path
       model: str
     command: "python train.py {train_data} {model}"
   predict:
     parameters:
-      historic_data: str
-      future_data: str
+      historic_data: path
+      future_data: path
       model: str
-      out_file: str
+      out_file: path
     command: "python predict.py {model} {historic_data} {future_data} {out_file}"
