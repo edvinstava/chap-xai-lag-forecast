@@ -1,5 +1,7 @@
 name: chap_xai_lag_forecast
 
+uv_env: pyproject.toml
+
 target: disease_cases
 required_covariates:
   - rainfall

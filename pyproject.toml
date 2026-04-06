@@ -1,0 +1,14 @@
+[project]
+name = "chap-xai-lag-forecast"
+version = "0.1.0"
+description = "CHAP external model: lagged climate features, XGBoost/linear, native SHAP"
+requires-python = ">=3.10"
+dependencies = [
+    "joblib",
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "shap",
+    "xgboost",
+]
