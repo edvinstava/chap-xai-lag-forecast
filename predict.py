@@ -25,20 +25,17 @@ def predict(model_fn, historic_data_fn, future_climatedata_fn, predictions_fn):
             shap_values = (x_df - background).to_numpy() * np.array(model_obj.coef_)
             expected = np.repeat(float(model_obj.intercept_ + np.dot(background.values, model_obj.coef_)), len(x_df))
 
-        long_rows = []
-        for row_idx, row in out_df.reset_index(drop=True).iterrows():
-            for feature_name in x_df.columns:
-                long_rows.append(
-                    {
-                        "location": row["location"],
-                        "time_period": row["time_period"],
-                        "feature_name": feature_name,
-                        "importance": float(shap_values[row_idx, x_df.columns.get_loc(feature_name)]),
-                        "actual_value": float(x_df.iloc[row_idx][feature_name]),
-                        "expected_value": float(expected[row_idx]),
-                    }
-                )
-        pd.DataFrame(long_rows).to_csv("shap_values.csv", index=False)
+        if isinstance(shap_values, list):
+            shap_values = shap_values[0]
+        shap_values = np.asarray(shap_values)
+
+        output_df = out_df.reset_index(drop=True).copy()
+        output_df["expected_value"] = expected
+        for feature_idx, feature_name in enumerate(x_df.columns):
+            output_df[f"shap__{feature_name}"] = shap_values[:, feature_idx]
+        for feature_name in x_df.columns:
+            output_df[f"value__{feature_name}"] = x_df[feature_name].to_numpy()
+        output_df.to_csv("shap_values.csv", index=False)
 
     payload = joblib.load(model_fn)
     future_df = pd.read_csv(future_climatedata_fn)
