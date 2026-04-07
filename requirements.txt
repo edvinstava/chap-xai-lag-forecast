@@ -10,3 +10,4 @@ chap-core
 scikit-learn
 shap
 matplotlib
+xgboost

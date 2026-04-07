@@ -105,6 +105,32 @@ def predict(model_fn, historic_data_fn, future_climatedata_fn, predictions_fn):
             'month_cos': np.cos(2 * np.pi * row['time_period'].month / 12.0)
         }
 
+        recent_cases = state['disease_cases'].tail(3) if len(state) else pd.Series(dtype=float)
+        if len(recent_cases):
+            feat['cases_roll_mean_3'] = float(recent_cases.mean())
+        else:
+            feat['cases_roll_mean_3'] = float(defaults['disease_cases'])
+        recent_cases_6 = state['disease_cases'].tail(6) if len(state) else pd.Series(dtype=float)
+        if len(recent_cases_6):
+            feat['cases_roll_mean_6'] = float(recent_cases_6.mean())
+        else:
+            feat['cases_roll_mean_6'] = float(defaults['disease_cases'])
+        if len(state) >= 2:
+            last_case = float(state.iloc[-1]['disease_cases'])
+            prev_case = float(state.iloc[-2]['disease_cases'])
+            feat['cases_diff_1'] = last_case - prev_case
+            feat['cases_growth'] = last_case / (prev_case + 1.0)
+        elif len(state) == 1:
+            last_case = float(state.iloc[-1]['disease_cases'])
+            feat['cases_diff_1'] = 0.0
+            feat['cases_growth'] = last_case / (defaults['disease_cases'] + 1.0)
+        else:
+            feat['cases_diff_1'] = 0.0
+            feat['cases_growth'] = 0.0
+        pop_value = row['population'] if pd.notna(row['population']) else defaults['population']
+        base_cases_for_rate = float(state.iloc[-1]['disease_cases']) if len(state) else float(defaults['disease_cases'])
+        feat['cases_per_100k'] = base_cases_for_rate / (float(pop_value) + 1.0) * 1e5
+
         for lag in lags:
             for col in ['rainfall', 'mean_temperature', 'population', 'disease_cases']:
                 key = f'{col}_lag_{lag}'
