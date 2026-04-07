@@ -132,7 +132,7 @@ def predict(model_fn, historic_data_fn, future_climatedata_fn, predictions_fn):
         }])
         state_by_loc[loc] = pd.concat([state, new_row], ignore_index=True)
 
-    future_df['time_period'] = future_df['time_period'].dt.strftime('%Y%m_1')
+    future_df['time_period'] = future_df['time_period'].dt.strftime('%Y-%m')
     x_pred_df = pd.DataFrame(x_rows)[feature_cols]
     shap_out_df = future_df[['location', 'time_period']].copy()
     write_native_shap(model, x_pred_df, shap_out_df)
