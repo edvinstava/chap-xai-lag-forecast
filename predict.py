@@ -25,11 +25,20 @@ def predict(model_fn, historic_data_fn, future_climatedata_fn, predictions_fn):
             shap_values = (x_df - background).to_numpy() * np.array(model_obj.coef_)
             expected = np.repeat(float(model_obj.intercept_ + np.dot(background.values, model_obj.coef_)), len(x_df))
 
-        shap_df = pd.DataFrame(shap_values, columns=x_df.columns)
-        shap_df.insert(0, 'time_period', out_df['time_period'].values)
-        shap_df.insert(0, 'location', out_df['location'].values)
-        shap_df.insert(2, 'expected_value', expected)
-        shap_df.to_csv("shap_values.csv", index=False)
+        long_rows = []
+        for row_idx, row in out_df.reset_index(drop=True).iterrows():
+            for feature_name in x_df.columns:
+                long_rows.append(
+                    {
+                        "location": row["location"],
+                        "time_period": row["time_period"],
+                        "feature_name": feature_name,
+                        "importance": float(shap_values[row_idx, x_df.columns.get_loc(feature_name)]),
+                        "actual_value": float(x_df.iloc[row_idx][feature_name]),
+                        "expected_value": float(expected[row_idx]),
+                    }
+                )
+        pd.DataFrame(long_rows).to_csv("shap_values.csv", index=False)
 
     payload = joblib.load(model_fn)
     future_df = pd.read_csv(future_climatedata_fn)
@@ -160,6 +169,9 @@ def predict(model_fn, historic_data_fn, future_climatedata_fn, predictions_fn):
 
     future_df['time_period'] = future_df['time_period'].dt.strftime('%Y-%m')
     x_pred_df = pd.DataFrame(x_rows)[feature_cols]
+    for col in feature_cols:
+        if col not in future_df.columns:
+            future_df[col] = x_pred_df[col].values
     shap_out_df = future_df[['location', 'time_period']].copy()
     write_native_shap(model, x_pred_df, shap_out_df)
     future_df.to_csv(predictions_fn, index=False)
